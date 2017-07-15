@@ -16,8 +16,16 @@ var promise = new Promise((done, fail) => {
 	});
 });
 
+$.ajax({
+	url: dataURL,
+	method: 'GET'
+}).done(function(res) {
+	console.log(res);
+});
+
 promise.then(arr => {
 	var trivia = arr[1].val;
+	console.log(trivia);
 
 	// (function game(object) {
 	// 	interval = setTimeout(function() {
@@ -60,7 +68,7 @@ promise.then(arr => {
 		answers.sort();
 		let formFields = '';
 		for(let answer in answers) {
-			formFields = formFields + `<input class="answer" type="radio" value="${answers[answer]}"> ${answers[answer]} <br>`;
+			formFields = formFields + `<input class="answer" type="radio" value="${answers[answer]}"> <span class="h4">${answers[answer]}</span> <br>`;
 		}
 		$('#Answers form').html(formFields);
 
