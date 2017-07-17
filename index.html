@@ -20,11 +20,46 @@
 </head>
 <body>
 	<header class="container text-center">
-		<h1 class="page-header">CS Trivia</h1>
+		<h1 class="page-header">Trivia Game</h1>
 	</header>
 
 	<main class="container">
-		<section id="TriviaGame" class="jumbotron row">
+
+		<section id="GameSetup" class="row">
+			<h2 class="col-xs-12">Choose Your Trivia Category</h2>
+
+			<form id="CategorySelect" class="col-xs-12">
+				<div class="radio">
+					<label>
+						<input type="radio" name="optionsRadio" id="ComputerScience" class="category" value="18" checked> Computer Science
+					</label>
+				</div>
+
+				<div class="radio">
+					<label>
+						<input type="radio" name="optionsRadio" id="Animals" class="category" value="27"> Animals
+					</label>
+				</div>
+
+				<div class="radio">
+					<label>
+						<input type="radio" name="optionsRadio" id="Television" class="category" value="14"> Television
+					</label>
+				</div>
+
+				<div class="radio">
+					<label>
+						<input type="radio" name="optionsRadio" id="VideoGames" class="category" value="15"> Video Games
+					</label>
+				</div>
+			</form>
+			<div class="col-xs-12">
+				<button id="ConfirmCategory" class="btn btn-primary"><strong>PLAY</strong> <span class="glyphicon glyphicon-play-circle"></span></button>
+			</div>
+		</section>
+
+		<section id="TriviaGame" class="jumbotron row hidden">
+				<div id="Timer" class="col-xs-12 h3"><span id="QuestionNumber" class="pull-left">1)</span><span id="Time" class="pull-right">20</span></div>
 				<div id="Question" class="col-xs-12 h3"></div>
 				<div id="Answers" class="col-xs-12">
 					<form>
@@ -33,10 +68,15 @@
 				</div>
 				<div id="FormButtons" class="col-xs-12">
 					<button id="Submit" class="btn btn-primary">Submit</button>
-					<button id="Continue" class="btn btn-primary">Continue</button>
+					<button id="Continue" class="btn btn-default disabled">Continue</button>
 				</div>
 		</section>
 
+		<section id="Alerts" class="row">
+			<div class="alert alert-info hide" role="alert"></div>
+			<div class="alert alert-danger hide" role="alert"></div>
+			<div class="alert alert-success hide" role="alert"></div>
+		</section>
 	</main>
 
 </body>

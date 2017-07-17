@@ -1,96 +1,106 @@
-// $.ajax({
-// 	dataType: 'json',
-// 	url: 'https://opentdb.com/api.php?amount=10&category=18&difficulty=medium&type=multiple',
-// 	data: data,
-// 	success: success
-// });
-var dataURL = 'https://opentdb.com/api.php?amount=10&category=18&difficulty=medium&type=multiple';
-var gameInterval;
-var promise = new Promise((done, fail) => {
-	var trivia = [];
-	$.getJSON(dataURL, function(data) {
-		$.each(data, function(key, val) {
-			trivia.push({key, val});
-		});
-		done(trivia);
-	});
-});
+var category = '18';
+var dataURL = `https://opentdb.com/api.php?amount=10&category=${category}&difficulty=medium&type=multiple`;
 
-$.ajax({
-	url: dataURL,
-	method: 'GET'
-}).done(function(res) {
-	console.log(res);
-});
+function categorySelect() {
+	category = $('.category:checked').val();
+	dataURL = `https://opentdb.com/api.php?amount=10&category=${category}&difficulty=medium&type=multiple`;
 
-promise.then(arr => {
-	var trivia = arr[1].val;
-	console.log(trivia);
+	startGame();
+}
 
-	// (function game(object) {
-	// 	interval = setTimeout(function() {
-	// 		console.log(object);
-	// 		let question = trivia[object].question;
-	// 		let incorrect_answers = trivia[object].incorrect_answers;
-	// 		let correct_answer = trivia[object].correct_answer;
+function startGame() {
+	$.ajax({
+		url: dataURL,
+		method: 'GET'
+	}).done(function(res) {
+		$('.page-header').html($('.page-header').html() + ' - ' + $('.category:checked').parent().text());
+		$('#GameSetup').addClass('hidden');
+		$('#TriviaGame').removeClass('hidden');
+		var evalInterval;
+		var timerInterval;
+		var questionNumber = 0;
+		var time = 20;
+		var gameLength = res.results.length;
+		var totalCorrect = 0;
 
-	// 		ask(question, incorrect_answers, correct_answer);
+		askQuestion();
 
-	// 		object--;
-	// 		if(object >= 0) { 
-	// 			game(object);
-	// 		}
+		function askQuestion() {
+			let question = res.results[questionNumber].question;
+			let incorrect_answers = res.results[questionNumber].incorrect_answers;
+			let correct_answer = res.results[questionNumber].correct_answer;
 
-	// 	}, 10000)
+			//setup answers array with correct & incorrect answers, then sort
+			let answers = [correct_answer];
+			for(let answer in incorrect_answers) {
+				answers.push(incorrect_answers[answer]);
+			}
+			answers.sort();
 
-	// })(trivia.length - 1);
-	let object = 0;
-	function game() {
-		if(object < trivia.length) {
-	 		let question = trivia[object].question;
-	 		let incorrect_answers = trivia[object].incorrect_answers;
-	 		let correct_answer = trivia[object].correct_answer;
+			//setup questions form elements
+			let formFields = '';
+			for(let answer in answers) {
+				formFields += `<div class="radio"><label><input class="answer" type="radio" name="answersRadio" value="${answers[answer]}"> <span class="h4">${answers[answer]}</span></label></div>`;
+			}
 
-	 		ask(question, incorrect_answers, correct_answer);
-	 		object++
-	 	}
-	}
-	game();
+			//build #TriviaGame
+			$('#Time').html('20');
+			$('#QuestionNumber').html(questionNumber + 1 + ')')
+			$('#Question').html(question);
+			$('#Answers form').html(formFields);
 
-	gameInterval = setInterval(game, 10000);
-
-	function ask(question, incorrect_answers, correct_answer) {
-		$('#Question').html(question);
-		let answers = [correct_answer];
-		for(let answer in incorrect_answers) {
-			answers.push(incorrect_answers[answer]);
-		}
-		answers.sort();
-		let formFields = '';
-		for(let answer in answers) {
-			formFields = formFields + `<input class="answer" type="radio" value="${answers[answer]}"> <span class="h4">${answers[answer]}</span> <br>`;
-		}
-		$('#Answers form').html(formFields);
-
-		$('#Submit').bind('click', function() {
-			$(this).unbind('click');
-			eval($('.answer:checked').val(), correct_answer);
-			clearInterval(gameInterval);
-			$('#Continue').bind('click', function() {
-				$(this).unbind('click');
-				game();
-				gameInterval = setInterval(game, 10000);
-
+			//clear and hide alerts
+			$('.alert').each(function() {
+				if(!$(this).hasClass('hide')) {
+					$(this).addClass('hide');
+				}
 			});
-		});
-	}
 
-	function eval(answer, correct_answer) {
-		if(answer === correct_answer) {
-			alert('Correct!');
-		}else{
-			alert(`The correct answer is ${correct_answer}`);
+			//get answer and bind eval function
+			$('#Submit').click(eval).removeClass('btn-default disabled').addClass('btn-primary');
+			$('#Continue').unbind('click').removeClass('btn-primary').addClass('btn-default disabled');
+
+			//set timer for auto evaluation
+			time = 20;
+			timerInterval = setInterval(timer, 1000);
+			evalInterval = setInterval(eval, 20010);
 		}
-	}
 
+		function eval() {
+			let answer = $('.answer:checked').val();
+			let correct_answer = res.results[questionNumber].correct_answer;
+
+			if(answer === correct_answer) {
+				$('.alert-info').html(answer + ' is correct!').removeClass('hide');
+				totalCorrect++;
+			}else{
+				$('.alert-danger').html('The correct answer is ' + correct_answer).removeClass('hide');
+			}
+
+			questionNumber++;
+
+			clearInterval(evalInterval);
+			clearInterval(timerInterval);
+
+			if(questionNumber < gameLength) {
+				$('#Submit').removeClass('btn-primary').addClass('btn-default disabled').unbind('click');
+				$('#Continue').removeClass('btn-primary disabled').addClass('btn-primary').click(askQuestion);
+			}else{
+				$('#Submit').removeClass('btn-primary').addClass('btn-default disabled').unbind('click');
+				$('#Continue').removeClass('btn-primary disabled').addClass('btn-primary').click(function(){location.reload();});
+				$('.alert-success').html(`${totalCorrect} / ${gameLength} correct`).removeClass('hide');
+			}
+		}
+
+		function timer() {
+			if(time > 0) {
+				time--;
+				$('#Time').html(time);
+			}
+		}
+	});
+}
+
+$(document).ready(function() {
+	$('#ConfirmCategory').click(categorySelect);
 });

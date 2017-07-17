@@ -5,3 +5,7 @@
 .answer {
 	margin-bottom: 10px;
 }
+
+.btn:focus {
+	outline: 0;
+}
