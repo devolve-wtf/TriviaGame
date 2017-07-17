@@ -13,7 +13,7 @@ function startGame() {
 		url: dataURL,
 		method: 'GET'
 	}).done(function(res) {
-		$('.page-header').html($('.page-header').html() + ' - ' + $('.category:checked').parent().text());
+		$('.page-header').html('Trivia Game - ' + $('.category:checked').parent().text());
 		$('#GameSetup').addClass('hidden');
 		$('#TriviaGame').removeClass('hidden');
 		var evalInterval;
@@ -67,10 +67,10 @@ function startGame() {
 		}
 
 		function eval() {
-			let answer = $('.answer:checked').val();
+			let answer = $('.answer:checked').next('.h4').text();
 			let correct_answer = res.results[questionNumber].correct_answer;
 
-			if(answer === correct_answer) {
+			if(answer == correct_answer) {
 				$('.alert-info').html(answer + ' is correct!').removeClass('hide');
 				totalCorrect++;
 			}else{
@@ -87,7 +87,7 @@ function startGame() {
 				$('#Continue').removeClass('btn-primary disabled').addClass('btn-primary').click(askQuestion);
 			}else{
 				$('#Submit').removeClass('btn-primary').addClass('btn-default disabled').unbind('click');
-				$('#Continue').removeClass('btn-primary disabled').addClass('btn-primary').click(function(){location.reload();});
+				$('#Continue').removeClass('btn-primary disabled').addClass('btn-primary').click(reset);
 				$('.alert-success').html(`${totalCorrect} / ${gameLength} correct`).removeClass('hide');
 			}
 		}
@@ -97,6 +97,13 @@ function startGame() {
 				time--;
 				$('#Time').html(time);
 			}
+		}
+
+		function reset() {
+			$('#TriviaGame').addClass('hidden');
+			$('#GameSetup').removeClass('hidden');
+			$('.alert').addClass('hide').empty();
+			$('.page-header').html('Trivia Game');
 		}
 	});
 }
