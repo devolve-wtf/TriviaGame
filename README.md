@@ -8,6 +8,6 @@ This trivia game uses an api provided by opentdb.com to dynamically generate que
 
 * The correct answer will be displayed for 10 seconds before moving on to the next question automatically
 
-* At the end of the game, the players correct out of total (correct / total) will be displayed
+* At the end of the game, the player's correct out of total (correct / total) will be displayed
 
 * The player can choose to play the game again in the same session by clicking continue
