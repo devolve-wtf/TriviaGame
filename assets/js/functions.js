@@ -18,6 +18,7 @@ function startGame() {
 		$('#TriviaGame').removeClass('hidden');
 		var evalInterval;
 		var timerInterval;
+		var questionInterval;
 		var questionNumber = 0;
 		var time = 20;
 		var gameLength = res.results.length;
@@ -40,7 +41,7 @@ function startGame() {
 			//setup questions form elements
 			let formFields = '';
 			for(let answer in answers) {
-				formFields += `<div class="radio"><label><input class="answer" type="radio" name="answersRadio" value="${answers[answer]}"> <span class="h4">${answers[answer]}</span></label></div>`;
+				formFields += `<div class="radio"><label><input class="answer" type="radio" name="answersRadio" value="${answers[answer].replace('"', '')}"> <span class="h4">${answers[answer]}</span></label></div>`;
 			}
 
 			//build #TriviaGame
@@ -64,11 +65,17 @@ function startGame() {
 			time = 20;
 			timerInterval = setInterval(timer, 1000);
 			evalInterval = setInterval(eval, 20010);
+			clearInterval(questionInterval);
 		}
 
 		function eval() {
-			let answer = $('.answer:checked').next('.h4').text();
+			let answer = 'no answer';
+			if($('.answer:checked').val()) {
+				answer = $('.answer:checked').val().replace(/&/g, "&amp;").replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+			}
 			let correct_answer = res.results[questionNumber].correct_answer;
+			console.log(answer);
+			console.log(correct_answer);
 
 			if(answer == correct_answer) {
 				$('.alert-info').html(answer + ' is correct!').removeClass('hide');
@@ -85,6 +92,7 @@ function startGame() {
 			if(questionNumber < gameLength) {
 				$('#Submit').removeClass('btn-primary').addClass('btn-default disabled').unbind('click');
 				$('#Continue').removeClass('btn-primary disabled').addClass('btn-primary').click(askQuestion);
+				questionInterval = setInterval(askQuestion, 10000);
 			}else{
 				$('#Submit').removeClass('btn-primary').addClass('btn-default disabled').unbind('click');
 				$('#Continue').removeClass('btn-primary disabled').addClass('btn-primary').click(reset);
